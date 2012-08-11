@@ -49,12 +49,11 @@ class FormViewDialog(object):
         FormView.schema_type = form
         form_view = FormView()
         for name, field in form_view.form.fields.items():
-            proxy = proxy_for(field.widget)
             if values:
                 value = values[name]
             else:
                 value = field.element.default_value
-            proxy.set_widget_value(value)
+            field.proxy.set_widget_value(value)
             if hasattr(field.widget, 'set_activates_default'):
                 field.widget.set_activates_default(gtk.TRUE)
             field.label_widget.set_use_markup(use_markup)
@@ -64,11 +63,8 @@ class FormViewDialog(object):
         self.window.set_position(gtk.WIN_POS_CENTER_ON_PARENT)        
         if parent:
             self.window.set_transient_for(parent)
-            print '[FormViewDialog] set_transient_for(%s)' % parent
         self.window.show_all()
         response = self.window.run()
         self.window.hide()
-        logging.debug('[FormViewDialog] response=%s value=%s'\
-                % (response, proxy.get_widget_value()))
         return (response == 0), {name: f.element.value
                 for name, f in form_view.form.fields.items()}

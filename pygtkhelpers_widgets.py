@@ -6,9 +6,12 @@ from path import path
 from pygtkhelpers.utils import gsignal
 from pygtkhelpers.forms import view_widgets, element_views, ElementBuilder, widget_for, FormView, IntegerBuilder
 from pygtkhelpers.proxy import widget_proxies, GObjectProxy, proxy_for
-from flatland.schema import String, Form, Integer, Float
+from pygtkhelpers.ui.widgets import SimpleComboBox
+from flatland.schema import String, Form, Integer, Float, Enum
+from gui.form_view_dialog import FormViewDialog
 
 
+VIEW_ENUM = 'enum'
 VIEW_FILEPATH = 'filepath'
 VIEW_DIRECTORY = 'directory'
 
@@ -157,6 +160,30 @@ class FloatBuilder(IntegerBuilder):
         return widget
 
 
+class EnumBuilder(ElementBuilder):
+    default_style = 'combo'
+
+    styles = {
+        'combo': SimpleComboBox,
+    }
+
+    def build(self, widget, style, element, options):
+        choices = tuple(enumerate(element.valid_values))
+        if element.default_value is None:
+            default_value = 0
+        elif isinstance(element.default_value, int):
+            # Assume value is index of choice
+            default_value = element.default_value
+            if default_value >= len(choices):
+                raise IndexError, 'Default index must be less than the number'\
+                        ' of choices (%d)' % len(choices)
+        else:
+            # Assume the default is the actual value
+            default_value = zip(*choices)[1].index(element.default_value)
+        widget.set_choices(choices, default_value)
+        return widget
+
+
 class FilepathProxy(GObjectProxy):
     """Proxy for a pygtkhelpers.ui.widgets.StringList.
     """
@@ -177,6 +204,7 @@ element_views.update({
     Filepath: VIEW_FILEPATH,
     Directory: VIEW_DIRECTORY,
     Float: VIEW_FLOAT,
+    Enum: VIEW_ENUM,
 })
 
 
@@ -185,6 +213,7 @@ view_widgets.update({
     VIEW_FILEPATH: FilepathBuilder(),
     VIEW_DIRECTORY: DirectoryBuilder(),
     VIEW_FLOAT: FloatBuilder(),
+    VIEW_ENUM: EnumBuilder(),
 })
 
 
@@ -200,13 +229,19 @@ if __name__ == '__main__':
         Integer.named('overlay_opacity').using(default=20, optional=True),
         Float.named('float_value').using(default=10.37, optional=True),
         Filepath.named('log_filepath').using(default='', optional=True),
-        Directory.named('devices_directory').using(default='', optional=True)
+        Directory.named('devices_directory').using(default='', optional=True),
+        Enum.named('test_enum').valued('auto-update',
+                'check for updates, but ask before installing',
+                                '''don't check for updates''')\
+        .using(default=1, optional=True)
     )
-    FormView.schema_type = form
-    view = FormView()
-    for field in view.form.fields.values():
-        field.proxy.set_widget_value(field.element.default_value)
-    expander = gtk.Expander()
-    expander.add(view.widget)
-    window.add(expander)
-    window.show_all()
+    dialog = FormViewDialog()
+    print dialog.run(form)
+    #FormView.schema_type = form
+    #view = FormViewDialog()
+    #for field in view.form.fields.values():
+        #field.proxy.set_widget_value(field.element.default_value)
+    #expander = gtk.Expander()
+    #expander.add(view.widget)
+    #window.add(expander)
+    #window.show_all()
