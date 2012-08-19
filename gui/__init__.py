@@ -141,6 +141,11 @@ def text_entry_dialog(name, value='', title='Input value', parent=None,
     return None 
 
 
+def contains_pointer(widget):
+    (x,y) = widget.get_pointer()
+    return 0<=x<=widget.allocation.width and 0<=y<=widget.allocation.height
+    
+
 if os.name == 'nt':
     def yesno(*args, **kwargs):
         parent = kwargs.get('parent', None)
