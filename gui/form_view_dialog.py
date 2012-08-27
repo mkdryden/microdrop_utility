@@ -53,6 +53,9 @@ class FormViewDialog(object):
                 value = values[name]
             else:
                 value = field.element.default_value
+            if not field.element.set(value):
+                raise ValueError, '"%s" is not a valid value for field "%s"' % (
+                        value, name)
             field.proxy.set_widget_value(value)
             if hasattr(field.widget, 'set_activates_default'):
                 field.widget.set_activates_default(gtk.TRUE)
