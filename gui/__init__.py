@@ -47,6 +47,9 @@ def textentry_validate(textentry, prev_value, type_):
     return prev_value
 
 
-def contains_pointer(widget):
-    (x,y) = widget.get_pointer()
+def contains_pointer(widget, coords=None):
+    if coords is None:
+        (x,y) = widget.get_pointer()
+    else:
+        (x,y) = coords
     return 0<=x<=widget.allocation.width and 0<=y<=widget.allocation.height
