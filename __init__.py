@@ -37,7 +37,7 @@ def is_int(s):
     except (ValueError, TypeError), e: return False
 
 
-def wrap_string(string, line_length=80, wrap_characters="\n"):    
+def wrap_string(string, line_length=80, wrap_characters="\n"):
     chars = 0
     wrapped_string = ""
     for word in string.split():
@@ -116,7 +116,7 @@ def copytree(src, dst, symlinks=False, ignore=None):
     except OSError, why:
         errors.extend((src, dst, str(why)))
     if errors:
-        raise Error, errors 
+        raise Error, errors
 
 
 class InvalidVersionStringError(Exception):
@@ -148,13 +148,13 @@ class Version:
         Initialize a Version object from a string of the form "x", "x.y", or
         "x.y.z" where x, y and z are integers representing the major, minor
         and micro versions.
-        
+
         Raises:
             InvalidVersionStringError
         """
         major, minor, micro = ('0','0','0')
         match = False
-        
+
         m = re.search('^(\d+)$', string)
         if m:
             major = m.groups()[0]
@@ -167,12 +167,12 @@ class Version:
         if m:
             major, minor, micro = m.groups()
             match = True
-            
+
         if match == False:
             raise InvalidVersionStringError
 
         return cls(int(major), int(minor), int(micro))
-    
+
     def __repr__(self):
         return "%s(%d.%d.%d)" % (self.__class__,
                                  self.major,
@@ -183,7 +183,7 @@ class Version:
         return "%d.%d.%d" % (self.major,
                              self.minor,
                              self.micro)
-        
+
     def __lt__(self, x):
         if self.major<x.major:
             return True
@@ -194,7 +194,7 @@ class Version:
                 if self.micro<x.micro:
                     return True
         return False
-    
+
     def __eq__(self, x):
         if (self.major, self.minor, self.micro) == (x.major, x.minor, x.micro):
             return True
@@ -203,6 +203,6 @@ class Version:
 
     def __ne__(self, x):
         return not self==x
-        
+
     def __le__(self, x):
         return self<x or self==x

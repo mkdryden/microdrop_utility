@@ -1,9 +1,8 @@
-from logger import logger
-
 import gtk
+from pygtkhelpers.ui.extra_dialogs import *
 
 from .. import is_float, is_int
-from pygtkhelpers.ui.extra_dialogs import *
+from ...logger import logger
 
 
 def register_shortcuts(window, shortcuts, enabled_widgets=None,
