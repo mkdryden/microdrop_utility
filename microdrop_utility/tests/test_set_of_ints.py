@@ -1,6 +1,6 @@
 from nose.tools import raises
 
-from ...utility import SetOfInts
+from ..set_of_ints import SetOfInts
 
 def test_init_from_comma_separated_list():
     """
