@@ -1,13 +1,13 @@
+import logging
 import gtk
 from pygtkhelpers.ui.extra_dialogs import *
 
 from .. import is_float, is_int
-from ...logger import logger
 
 
 def register_shortcuts(window, shortcuts, enabled_widgets=None,
                         disabled_widgets=None):
-    logger.debug('register_shortcuts()...')
+    logging.debug('register_shortcuts()...')
     if enabled_widgets and disabled_widgets:
         raise ValueError, '''Only an enabled list OR a disabled list of'''\
                             ''' widgets is permitted.'''
@@ -30,7 +30,7 @@ def register_shortcuts(window, shortcuts, enabled_widgets=None,
             lambda a, b, c, d, action=action: \
                 action_wrapper(action, enabled_widgets, disabled_widgets))
     window.add_accel_group(accelgroup)
-    logger.debug('DONE')
+    logging.debug('DONE')
     return accelgroup
 
 
