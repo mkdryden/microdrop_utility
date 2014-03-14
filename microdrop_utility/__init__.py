@@ -24,8 +24,6 @@ from path import path
 
 from .set_of_ints import SetOfInts
 
-PROGRAM_LAUNCHED = False
-
 
 def is_float(s):
     try: return (float(s), True)[1]
@@ -127,6 +125,10 @@ class VersionError(Exception):
     pass
 
 
+class DifferentVersionTagsError(Exception):
+    pass
+
+
 class FutureVersionError(Exception):
     def __init__(self, current_version, future_version, *args, **kwargs):
         super(FutureVersionError, self).__init__(*args, **kwargs)
@@ -135,12 +137,16 @@ class FutureVersionError(Exception):
 
 
 class Version:
-    def __init__(self, major=0, minor=0, micro=0):
+    def __init__(self, major=0, minor=0, micro=0, tags=[]):
         if type(major)!=int or type(minor)!=int or type(micro)!=int:
             raise TypeError
         self.major = major
         self.minor = minor
         self.micro = micro
+        if isinstance(tags, basestring):
+            self.tags = [tags]
+        else:
+            self.tags = tags
 
     @classmethod
     def fromstring(cls, string):
@@ -152,7 +158,7 @@ class Version:
         Raises:
             InvalidVersionStringError
         """
-        major, minor, micro = ('0','0','0')
+        major, minor, micro, tags = ('0', '0', '0', [])
         match = False
 
         m = re.search('^(\d+)$', string)
@@ -168,23 +174,36 @@ class Version:
             major, minor, micro = m.groups()
             match = True
 
+        m = re.search('^(\d+)\.(\d+)\.(\d+)-(.*)$', string)
+        if m:
+            major, minor, micro, tags = m.groups()
+            tags = [tag.strip() for tag in tags.split(",")]
+            match = True
+
         if match == False:
             raise InvalidVersionStringError
 
-        return cls(int(major), int(minor), int(micro))
+        return cls(int(major), int(minor), int(micro), tags)
 
     def __repr__(self):
-        return "%s(%d.%d.%d)" % (self.__class__,
-                                 self.major,
-                                 self.minor,
-                                 self.micro)
+        return "%s(%s)" % (self.__class__, self.__str__())
 
     def __str__(self):
-        return "%d.%d.%d" % (self.major,
-                             self.minor,
-                             self.micro)
+        version_string = "%d.%d.%d" % (self.major,
+                                       self.minor,
+                                       self.micro,
+                                      )
+        if self.tags:
+            version_string += "-"
+            for i, tag in enumerate(self.tags):
+                version_string += tag
+                if i < len(self.tags)-1:
+                    version_string += ","
+        return version_string
 
     def __lt__(self, x):
+        if self.tags != x.tags:
+            raise DifferentVersionTagsError
         if self.major<x.major:
             return True
         elif self.major==x.major:
@@ -196,7 +215,8 @@ class Version:
         return False
 
     def __eq__(self, x):
-        if (self.major, self.minor, self.micro) == (x.major, x.minor, x.micro):
+        if (self.major, self.minor, self.micro, self.tags) == \
+                (x.major, x.minor, x.micro, x.tags):
             return True
         else:
             return False
@@ -205,4 +225,6 @@ class Version:
         return not self==x
 
     def __le__(self, x):
+        if self.tags != x.tags:
+            raise DifferentVersionTagsError
         return self<x or self==x

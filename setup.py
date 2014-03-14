@@ -2,7 +2,7 @@ from distutils.core import setup
 
 
 setup(name='microdrop_utility',
-      version='0.0.1',
+      version='0.0.12',
       description='Utility functions and classes for MicroDrop, which might '
       'be potentially useful in other projects.',
       keywords='microdrop dropbot utility',
