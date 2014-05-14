@@ -21,6 +21,7 @@ import sys
 import re
 
 from path_helpers import path
+from git_helpers import Git
 
 from .set_of_ints import SetOfInts
 
@@ -184,6 +185,26 @@ class Version:
             raise InvalidVersionStringError
 
         return cls(int(major), int(minor), int(micro), tags)
+
+    @classmethod
+    def from_git_repository(cls):
+        try:
+            version = Git(None).describe()
+            branch = Git(None).branch()
+            if branch == "master":
+                tags = ""
+            else:
+                tags = "-" + branch
+            m = re.search('^v(?P<major>\d+)\.(?P<minor>\d+)(-(?P<micro>\d+))?', version)
+            if m.group('micro'):
+                micro = m.group('micro')
+            else:
+                micro = '0'
+            return cls.fromstring("%s.%s.%s%s" % (m.group('major'),
+                                  m.group('minor'),
+                                  micro, tags))
+        except:
+            return None
 
     def __repr__(self):
         return "%s(%s)" % (self.__class__, self.__str__())

@@ -11,4 +11,5 @@ setup(name='microdrop_utility',
       url='http://github.com/cfobel/microdrop_utility.git',
       license='GPL',
       packages=['microdrop_utility', 'microdrop_utility.gui',
-                'microdrop_utility.tests'])
+                'microdrop_utility.tests'],
+      install_requires=['git_helpers'])
