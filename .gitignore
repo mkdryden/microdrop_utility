@@ -4,3 +4,5 @@ RELEASE-VERSION
 MANIFEST
 .project
 .pydevproject
+.settings/
+dist/

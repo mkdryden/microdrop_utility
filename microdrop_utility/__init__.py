@@ -138,12 +138,13 @@ class FutureVersionError(Exception):
 
 
 class Version:
-    def __init__(self, major=0, minor=0, micro=0, tags=[]):
+    def __init__(self, major=0, minor=0, micro=0, tags=[], rc=None):
         if type(major)!=int or type(minor)!=int or type(micro)!=int:
             raise TypeError
         self.major = major
         self.minor = minor
         self.micro = micro
+        self.rc = rc
         if isinstance(tags, basestring):
             self.tags = [tags]
         else:
@@ -159,32 +160,26 @@ class Version:
         Raises:
             InvalidVersionStringError
         """
-        major, minor, micro, tags = ('0', '0', '0', [])
+        major, minor, micro, rc, tags = (0, 0, 0, None, [])
         match = False
-
-        m = re.search('^(\d+)$', string)
+        m = re.search('^(?P<major>\d+)(?:\.(?P<minor>\d+)){0,1}'
+                      '(?:\.(?P<micro>\d+)){0,1}(?:rc(?P<rc>\d+)){0,1}'
+                      '(?:-(?P<tags>.*)){0,1}', string)
         if m:
-            major = m.groups()[0]
-            match = True
-        m = re.search('^(\d+)\.(\d+)$', string)
-        if m:
-            major, minor = m.groups()
-            match = True
-        m = re.search('^(\d+)\.(\d+)\.(\d+)$', string)
-        if m:
-            major, minor, micro = m.groups()
-            match = True
-
-        m = re.search('^(\d+)\.(\d+)\.(\d+)-(.*)$', string)
-        if m:
-            major, minor, micro, tags = m.groups()
-            tags = [tag.strip() for tag in tags.split(",")]
-            match = True
-
-        if match == False:
+            major = int(m.group('major'))
+            if m.group('minor'):
+                minor = int(m.group('minor'))
+            if m.group('micro'):
+                micro = int(m.group('micro'))
+            if m.group('rc'):
+                rc = int(m.group('rc'))
+            if m.group('tags'):
+                tags = m.group('tags')
+                tags = [tag.strip() for tag in tags.split(",")]
+        else:
             raise InvalidVersionStringError
 
-        return cls(int(major), int(minor), int(micro), tags)
+        return cls(major, minor, micro, tags, rc)
 
     @classmethod
     def from_git_repository(cls):
@@ -195,14 +190,19 @@ class Version:
                 tags = ""
             else:
                 tags = "-" + branch
-            m = re.search('^v(?P<major>\d+)\.(?P<minor>\d+)(-(?P<micro>\d+))?', version)
+            m = re.search('^v(?P<major>\d+)(?:\.(?P<minor>\d+)){0,1}'
+                          '(?:rc(?P<rc>\d+)){0,1}(-(?P<micro>\d+))?', version)
             if m.group('micro'):
                 micro = m.group('micro')
             else:
                 micro = '0'
-            return cls.fromstring("%s.%s.%s%s" % (m.group('major'),
+            if m.group('rc'):
+                rc = "rc%s" % m.group('rc')
+            else:
+                rc = ""
+            return cls.fromstring("%s.%s.%s%s%s" % (m.group('major'),
                                   m.group('minor'),
-                                  micro, tags))
+                                  micro, rc, tags))
         except:
             return None
 
@@ -214,6 +214,8 @@ class Version:
                                        self.minor,
                                        self.micro,
                                       )
+        if self.rc is not None:
+            version_string += "rc%d" % self.rc
         if self.tags:
             version_string += "-"
             for i, tag in enumerate(self.tags):
@@ -233,11 +235,14 @@ class Version:
             elif self.minor==x.minor:
                 if self.micro<x.micro:
                     return True
+                elif self.micro==x.micro:
+                    if (self.rc and x.rc is None) or self.rc<x.rc:
+                        return True
         return False
 
     def __eq__(self, x):
-        if (self.major, self.minor, self.micro, self.tags) == \
-                (x.major, x.minor, x.micro, x.tags):
+        if (self.major, self.minor, self.micro, self.tags, self.rc) == \
+                (x.major, x.minor, x.micro, x.tags, self.rc):
             return True
         else:
             return False
