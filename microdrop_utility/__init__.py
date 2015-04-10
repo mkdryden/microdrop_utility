@@ -236,13 +236,13 @@ class Version:
                 if self.micro<x.micro:
                     return True
                 elif self.micro==x.micro:
-                    if (self.rc and x.rc is None) or self.rc<x.rc:
+                    if (self.rc is not None and x.rc is None) or self.rc<x.rc:
                         return True
         return False
 
     def __eq__(self, x):
         if (self.major, self.minor, self.micro, self.tags, self.rc) == \
-                (x.major, x.minor, x.micro, x.tags, self.rc):
+                (x.major, x.minor, x.micro, x.tags, x.rc):
             return True
         else:
             return False
