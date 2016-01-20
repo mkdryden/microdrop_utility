@@ -186,7 +186,7 @@ class Version:
         try:
             version = Git(None).describe()
             branch = Git(None).branch()
-            if branch == "master":
+            if branch == "master" or branch.startswith('release'):
                 tags = ""
             else:
                 tags = "-" + branch
