@@ -6,8 +6,18 @@ from .. import is_float, is_int
 
 
 def register_shortcuts(window, shortcuts, enabled_widgets=None,
-                        disabled_widgets=None):
+                       disabled_widgets=None):
     logging.debug('register_shortcuts()...')
+    accelgroup = get_accel_group(window, shortcuts,
+                                 enabled_widgets=enabled_widgets,
+                                 disabled_widgets=disabled_widgets)
+    window.add_accel_group(accelgroup)
+    logging.debug('DONE')
+    return accelgroup
+
+
+def get_accel_group(window, shortcuts, enabled_widgets=None,
+                    disabled_widgets=None):
     if enabled_widgets and disabled_widgets:
         raise ValueError, '''Only an enabled list OR a disabled list of'''\
                             ''' widgets is permitted.'''
@@ -27,10 +37,9 @@ def register_shortcuts(window, shortcuts, enabled_widgets=None,
     for shortcut, action in shortcuts.iteritems():
         key, modifier = gtk.accelerator_parse(shortcut)
         accelgroup.connect_group(key, modifier, gtk.ACCEL_VISIBLE,
-            lambda a, b, c, d, action=action: \
-                action_wrapper(action, enabled_widgets, disabled_widgets))
-    window.add_accel_group(accelgroup)
-    logging.debug('DONE')
+                                 lambda a, b, c, d, action=action:
+                                 action_wrapper(action, enabled_widgets,
+                                                disabled_widgets))
     return accelgroup
 
 
