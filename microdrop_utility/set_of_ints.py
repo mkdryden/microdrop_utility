@@ -11,10 +11,10 @@ class SetOfInts(set):
                     min_value = self._validate(m.group(1))
                     max_value = self._validate(m.group(2))
                     if min_value>=max_value:
-                        raise ValueError, ("Ranges must be declared in "
+                        raise ValueError("Ranges must be declared in "
                         "increasing order (i.e., '%d-%d' instead of '%d-%d'" %
                         (max_value, min_value, min_value, max_value))
-                    data.extend(range(min_value,max_value+1))            
+                    data.extend(list(range(min_value,max_value+1)))            
                 else:
                     data.append(self._validate(i))
         elif isinstance(data, list):

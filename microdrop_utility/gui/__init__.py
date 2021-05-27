@@ -1,5 +1,7 @@
 import logging
-import gtk
+import gi
+gi.require_version('Gtk', '3.0')
+from gi.repository import Gtk
 from pygtkhelpers.ui.extra_dialogs import *
 
 from .. import is_float, is_int
@@ -19,9 +21,9 @@ def register_shortcuts(window, shortcuts, enabled_widgets=None,
 def get_accel_group(window, shortcuts, enabled_widgets=None,
                     disabled_widgets=None):
     if enabled_widgets and disabled_widgets:
-        raise ValueError, '''Only an enabled list OR a disabled list of'''\
-                            ''' widgets is permitted.'''
-    accelgroup = gtk.AccelGroup()
+        raise ValueError('''Only an enabled list OR a disabled list of'''\
+                            ''' widgets is permitted.''')
+    accelgroup = Gtk.AccelGroup()
 
     def action_wrapper(action, enabled, disabled, *args, **kwargs):
         active = window.get_focus()
@@ -34,9 +36,9 @@ def get_accel_group(window, shortcuts, enabled_widgets=None,
             # Ignore shortcut and pass control to default handlers
             return False
 
-    for shortcut, action in shortcuts.iteritems():
-        key, modifier = gtk.accelerator_parse(shortcut)
-        accelgroup.connect_group(key, modifier, gtk.ACCEL_VISIBLE,
+    for shortcut, action in shortcuts.items():
+        key, modifier = Gtk.accelerator_parse(shortcut)
+        accelgroup.connect(key, modifier, Gtk.AccelFlags.VISIBLE,
                                  lambda a, b, c, d, action=action:
                                  action_wrapper(action, enabled_widgets,
                                                 disabled_widgets))

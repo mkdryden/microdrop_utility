@@ -28,12 +28,12 @@ from .set_of_ints import SetOfInts
 
 def is_float(s):
     try: return (float(s), True)[1]
-    except (ValueError, TypeError), e: return False
+    except (ValueError, TypeError) as e: return False
 
 
 def is_int(s):
     try: return (int(s), True)[1]
-    except (ValueError, TypeError), e: return False
+    except (ValueError, TypeError) as e: return False
 
 
 def wrap_string(string, line_length=80, wrap_characters="\n"):
@@ -52,10 +52,10 @@ def wrap_string(string, line_length=80, wrap_characters="\n"):
 def base_path():
     # When executing from a frozen (pyinstaller) executable...
     if hasattr(sys, 'frozen'):
-        print 'FROZEN!'
+        print('FROZEN!')
         return path(sys.executable).parent
     else:
-        print 'NOT FROZEN!'
+        print('NOT FROZEN!')
 
     # Otherwise...
     try:
@@ -77,7 +77,7 @@ def copytree(src, dst, symlinks=False, ignore=None):
 
     try:
         os.makedirs(dst)
-    except OSError, exc:
+    except OSError as exc:
         # XXX - this is pretty ugly
         if "file already exists" in exc[1]:  # Windows
             pass
@@ -101,21 +101,21 @@ def copytree(src, dst, symlinks=False, ignore=None):
             else:
                 copy2(srcname, dstname)
             # XXX What about devices, sockets etc.?
-        except (IOError, os.error), why:
+        except (IOError, os.error) as why:
             errors.append((srcname, dstname, str(why)))
         # catch the Error from the recursive copytree so that we can
         # continue with other files
-        except Error, err:
+        except Error as err:
             errors.extend(err.args[0])
     try:
         copystat(src, dst)
     except WindowsError:
         # can't copy file access times on Windows
         pass
-    except OSError, why:
+    except OSError as why:
         errors.extend((src, dst, str(why)))
     if errors:
-        raise Error, errors
+        raise Error(errors)
 
 
 class InvalidVersionStringError(Exception):
@@ -145,7 +145,7 @@ class Version:
         self.minor = minor
         self.micro = micro
         self.rc = rc
-        if isinstance(tags, basestring):
+        if isinstance(tags, str):
             self.tags = [tags]
         else:
             self.tags = tags
